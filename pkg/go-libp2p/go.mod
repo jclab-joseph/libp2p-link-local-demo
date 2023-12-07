@@ -4,6 +4,8 @@ go 1.20
 
 retract v0.26.1 // Tag was applied incorrectly due to a bug in the release workflow.
 
+replace github.com/libp2p/zeroconf/v2 => ../zeroconf
+
 require (
 	github.com/benbjohnson/clock v1.3.5
 	github.com/davidlazar/go-crypto v0.0.0-20200604182044-b73af7476f6c
@@ -29,7 +31,7 @@ require (
 	github.com/libp2p/go-netroute v0.2.1
 	github.com/libp2p/go-reuseport v0.4.0
 	github.com/libp2p/go-yamux/v4 v4.0.1
-	github.com/libp2p/zeroconf/v2 v2.2.0
+	github.com/libp2p/zeroconf/v2 v2.0.0-00010101000000-000000000000
 	github.com/marten-seemann/tcp v0.0.0-20210406111302-dfbc87cc63fd
 	github.com/mikioh/tcpinfo v0.0.0-20190314235526-30a79bb1804b
 	github.com/minio/sha256-simd v1.0.1

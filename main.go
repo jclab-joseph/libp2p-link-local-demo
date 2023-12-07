@@ -7,7 +7,9 @@ import (
 	"github.com/chzyer/readline"
 	"github.com/libp2p/go-libp2p"
 	"github.com/libp2p/go-libp2p/core/crypto"
+	"github.com/libp2p/go-libp2p/core/host"
 	"github.com/libp2p/go-libp2p/core/peer"
+	"github.com/libp2p/go-libp2p/p2p/discovery/mdns"
 	"github.com/libp2p/go-libp2p/p2p/transport/tcp"
 	"github.com/manifoldco/promptui"
 	ma "github.com/multiformats/go-multiaddr"
@@ -23,7 +25,9 @@ const menuExit = "Exit"
 
 func main() {
 	var iface string
+	var mdnsEnable bool
 	flag.StringVar(&iface, "iface", "br0", "interface name")
+	flag.BoolVar(&mdnsEnable, "mdns", true, "enable mdns")
 	flag.Parse()
 
 	ctx, cancel := context.WithCancel(context.Background())
@@ -58,6 +62,19 @@ func main() {
 	_ = ctx
 	_ = priv
 	_ = localAddrs
+
+	targetIface, err := net.InterfaceByName(iface)
+	if err != nil {
+		log.Fatalln(err)
+	}
+
+	mdnsService := mdns.NewMdnsService(h, "_p2p-discovery._udp", &MdnsHandler{
+		host: h,
+	})
+	err = mdnsService.Start([]net.Interface{*targetIface})
+	if err != nil {
+		log.Fatalln(err)
+	}
 
 	ps := h.Peerstore()
 
@@ -162,4 +179,19 @@ func GetLinkLocalAddresses(ifname string) ([]ma.Multiaddr, error) {
 		}
 	}
 	return maddrs, nil
+}
+
+type MdnsHandler struct {
+	host host.Host
+}
+
+func (m *MdnsHandler) GetHost() host.Host {
+	return m.host
+}
+
+func (m *MdnsHandler) HandlePeerFound(p peer.AddrInfo) {
+	log.Println("[MDNS HANDLER] connecting to discovered peer: ", p)
+	if err := m.host.Connect(context.Background(), p); err != nil {
+		log.Printf("[MDNS HANDLER] failed to connect to peer %s found by discovery: %s", p.ID, err)
+	}
 }
