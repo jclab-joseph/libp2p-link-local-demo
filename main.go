@@ -47,7 +47,7 @@ func main() {
 	for _, addr := range localAddrs {
 		listenAddrs = append(listenAddrs, ma.StringCast(addr.String()+"/tcp/0"))
 	}
-	listenAddrs = append(listenAddrs, ma.StringCast("/ip4/127.0.0.1/tcp/0"))
+	// listenAddrs = append(listenAddrs, ma.StringCast("/ip4/127.0.0.1/tcp/0"))
 
 	h, err := libp2p.New(
 		libp2p.Identity(priv),
